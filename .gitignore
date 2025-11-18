@@ -211,3 +211,4 @@ input.txt
 *.xml
 mini_gpt.iml
 .venv/
+.idea/
