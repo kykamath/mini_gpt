@@ -52,7 +52,7 @@ def get_batch(split):
 # --- Evaluation Utility ---
 @torch.no_grad()
 def estimate_loss(model):
-    """Evaluates the model on train/val split and returns average loss."""
+    """ Evaluates the model on train/val split and returns average loss."""
     out = {}
     model.eval() # Set model to evaluation mode
     for split in ['train', 'val']:
