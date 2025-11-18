@@ -65,5 +65,17 @@ def estimate_loss(model):
     model.train() # Set model back to training mode
     return out
 
-d = get_batch("train")
-print(d)
+############# Custom code ##############
+
+class AddModule(nn.Module):
+    def __init__(self):
+        super(AddModule, self).__init__()
+
+    def forward(self, x, y):
+        return x + y
+
+
+
+
+# d = get_batch("train")
+# print(d)
