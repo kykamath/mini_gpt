@@ -75,6 +75,43 @@ class AddModule(nn.Module):
         return x + y
 
 
+class Head(nn.Module):
+    def __init__(self, head_size):
+        super(Head, self).__init__()
+        self.key = nn.Linear(N_EMBD, head_size, bias=False)
+        self.query = nn.Linear(N_EMBD, head_size, bias=False)
+        self.value = nn.Linear(N_EMBD, head_size, bias=False)
+
+        # Register the causal mask as a buffer (not a parameter)
+        self.register_buffer("tril", torch.tril(torch.ones(BLOCK_SIZE, BLOCK_SIZE)))
+        self.dropout = nn.Dropout(DROPOUT)
+
+
+    def forward(self, x):
+        B, T, C = x.shape
+        k = self.key(x) # (B, T, head_size)
+        q = self.query(x) # (B, T, head_size)
+
+        # 1. Compute Attention Scores (QK^T / sqrt(d_k))
+        # wei shape: (B, T, T)
+        wei = q @ k.transpose(-2, -1) * k.shape[-1] ** -0.5
+        # wei = q @ k.transpose(-2, -1) * C ** -0.5
+
+        # 2. Causal Masking: prevents attention to future tokens
+        wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf'))
+
+        # 3. Softmax and Dropout
+        wei = F.softmax(wei, dim=-1)
+        wei = self.dropout(wei)
+
+        # 4. Weighted aggregation of values
+        v = self.value(x)  # (B, T, head_size)
+        out = wei @ v  # (B, T, head_size)
+        return out
+
+
+
+
 
 
 # d = get_batch("train")
